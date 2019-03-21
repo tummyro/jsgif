@@ -2,8 +2,10 @@
 <script src="../LZWEncoder.js"></script>
 <script src="../NeuQuant.js"></script>
 <script src="../GIFEncoder.js"></script>
+<script src="./js/canvasHelper.js"></script>
 <style>
 </style>
+
 <body>
     <canvas id="dialogWrapper"></canvas>
     <img id="image">
@@ -32,38 +34,47 @@
     var context = canvas.getContext('2d');
 
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.height = window.innerHeight+200;
 
+ 
+    context.fillStyle = "rgb(106,195,140)";
+    context.fillRect (30, 30, canvas.width, canvas.height);  
 
-    var background = new Image();
-    background.src = "assets/tmy-bg.jpg";
 
     var encoder = new GIFEncoder();
     encoder.setRepeat(0); //auto-loop
     encoder.setDelay(500);
-    console.log(encoder.start(), 'start encoder');
+    encoder.start();
 
-    background.onload = function(){
-        context.drawImage(background,0,0);
-        console.log(this.encoder.addFrame(this.context));   //why encoder.start hasn't started here?
-    }
+    // var background = new Image();
+    // background.onload = function () {
+    //     console.log(background);
+    //     context.drawImage(background, 0, 0, canvas.width, canvas.height);
+    //     console.log(canvas.width, canvas.height);
+    //     encoder.setSize(canvas.width, canvas.height);
+    //     console.log(encoder.addFrame(context, true), 'add frame bg', context);   //why encoder.start hasn't started here?
+       
+    // }
+    // background.src = "assets/tmy-bg.jpg";
+
 
     var speechbubles = [];
     var verticalPos = 100;
-    for (var i = 0; i < bubbles.length - 1; i++) {
+
+    for (var i = 0; i < bubbles.length -1; i++) {
 
         speechbubles[i] = new SpeechBuble({
             y: verticalPos,
             dialog: bubbles[i].split("#").join(",")
         });
 
-        verticalPos += 100;
+        verticalPos += 90;
     }
 
     function SpeechBuble(params) {
-        this.x = params.X || 300;
+        this.x = params.x || 300;
         this.y = params.y || 0;
-        this.width = 400;
+        this.width = params.width || 400;
         this.height = params.height || 50;
         this.fillStyle = params.fillStyle || "#FFFFFF";
         this.strokeStyle = params.strokeStyle || "#000000";
@@ -71,49 +82,18 @@
         this.dialog = params.dialog || '';
     }
 
-    function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
-        if (typeof stroke == 'undefined') {
-            stroke = true;
-        }
-        if (typeof radius === 'undefined') {
-            radius = 5;
-        }
-        if (typeof radius === 'number') {
-            radius = { tl: radius, tr: radius, br: radius, bl: radius };
-        } else {
-            var defaultRadius = { tl: 0, tr: 0, br: 0, bl: 0 };
-            for (var side in defaultRadius) {
-                radius[side] = radius[side] || defaultRadius[side];
-            }
-        }
-        ctx.beginPath();
-        ctx.moveTo(x + radius.tl, y);
-        ctx.lineTo(x + width - radius.tr, y);
-        ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
-        ctx.lineTo(x + width, y + height - radius.br);
-        ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
-        ctx.lineTo(x + radius.bl, y + height);
-        ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
-        ctx.lineTo(x, y + radius.tl);
-        ctx.quadraticCurveTo(x, y, x + radius.tl, y);
-        ctx.closePath();
-        if (fill) {
-            ctx.fill();
-        }
-        if (stroke) {
-            ctx.stroke();
-        }
-
-    }
 
     SpeechBuble.prototype.draw = function () {
         if (this.fillStyle) {
             context.fillStyle = this.fillStyle;
-            roundRect(context, this.x, this.y, this.width, this.height, 25, true);
-            console.log(encoder.addFrame(context));
-            context.fillStyle = "#00AF50";
-            context.fillText(this.dialog, this.x + 20, this.y + 25);
-            console.log(encoder.addFrame(context));
+            roundRect(context, this.x, this.y, this.width, this.height, 25,true,false);
+            context.fillStyle = '#fff';
+            drawArrowhead(context, {x:this.x+200, y:this.y}, {x:this.x+200, y:this.y+54}, 10);
+           // console.log(encoder.addFrame(context));
+            context.fillStyle = "#000";
+            context.font = "18px Arial";
+            context.fillText(this.dialog, this.x + 20, this.y + 30);
+           // console.log(encoder.addFrame(context));
         }
 
         if (this.strokeStyle && this.lineWidth) {
@@ -123,32 +103,40 @@
         }
 
     }
-    
+
+    function finalSpeech() {
+        let x = 275;
+        let y = 600;
+        let height = 100;
+        let width= 450;
+        let dialog = bubbles[5]; // cta
+        context.fillStyle = '#FDD99F';
+
+        roundRect(context, x, y, width, height, 25, true);
+        // console.log(encoder.addFrame(context));
+        context.fillStyle = "#00AF50";
+        context.fillText(dialog, x + 80, y + 50);
+    }
+
+    // var tuLogo = new Image();
+    // tuLogo.src = "assets/logo.png";
+
+    // tuLogo.onload = function () {
+    //     this.context.drawImage(tuLogo, 425, 600, 130, 130);
+    //     console.log(this.encoder.addFrame(this.context));
+    // }
+
 
     for (var i = 0; i < speechbubles.length; ++i) {
         speechbubles[i].draw();
     }
 
-    var cta= new SpeechBuble({
-        x: 425,
-        y: 600,
-        height: 352,
-        dialog: 'CTA',
-    });
-    cta.draw();
-
-    var tuLogo = new Image();
-    tuLogo.src = "assets/logo.png";
-
-    tuLogo.onload = function(){
-        context.drawImage(tuLogo,425,600,130,130);
-        console.log(this.encoder.addFrame(this.context));
-    }
-
-    
+   this.finalSpeech();
 
 
-    encoder.finish();
-    document.getElementById('image').src = 'data:image/gif;base64,'+encode64(encoder.stream().getData())
+   // console.log(encoder.finish(), 'encoder finish');
+
+
+    document.getElementById('image').src = 'data:image/gif;base64,' + encode64(encoder.stream().getData())
 
 </script>
