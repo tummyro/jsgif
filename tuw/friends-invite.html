@@ -4,11 +4,23 @@
 <script src="../GIFEncoder.js"></script>
 <script src="./js/canvasHelper.js"></script>
 <style>
+    body {
+        background-color: ivory;
+    }
+
+    #canvas {
+        border: 1px solid red;
+    }
 </style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenLite.min.js"></script>
 
 <body>
+    <h1>Building the .gif</h1>
     <canvas id="dialogWrapper"></canvas>
     <img id="image">
+    <button id=play>Play</button>
+    <button id=replay>Replay</button>
 </body>
 
 
@@ -29,71 +41,130 @@
     var params = getParams(window.location.href);
     var bubbles = decodeURIComponent(atob(params.options)).split(",");
 
-    console.log(bubbles);
     var canvas = document.getElementById('dialogWrapper');
     var context = canvas.getContext('2d');
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight+200;
+    canvas.width = 600;
+    canvas.height = window.innerHeight + 150;
+    const lineheight = 30,
+        limitCharacters = 35;
 
- 
+
     context.fillStyle = "rgb(106,195,140)";
-    context.fillRect (30, 30, canvas.width, canvas.height);  
-
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
     var encoder = new GIFEncoder();
-    encoder.setRepeat(0); //auto-loop
-    encoder.setDelay(500);
-    encoder.start();
+    encoder.setRepeat(1); //auto-loop
+    encoder.setDelay(2000);
 
-    // var background = new Image();
-    // background.onload = function () {
-    //     console.log(background);
-    //     context.drawImage(background, 0, 0, canvas.width, canvas.height);
-    //     console.log(canvas.width, canvas.height);
-    //     encoder.setSize(canvas.width, canvas.height);
-    //     console.log(encoder.addFrame(context, true), 'add frame bg', context);   //why encoder.start hasn't started here?
-       
-    // }
-    // background.src = "assets/tmy-bg.jpg";
+    var tuLogo = new Image();
+    var typingAnim = new Image();
+    tuLogo.src = "assets/tu96.png";
+   
+    var that = this; 
+    tuLogo.onload = function () {
+        encoder.start();
+        console.log(encoder.addFrame(that.context));
+
+        // // Use Greensock to animate from RotatingRect's current angle
+        // var tl = TweenLite.to(RotatingRect, 5, {
+        //     paused: true,
+        //     rangle: PI2 * 2,
+        //     ease: "Quart.easeOut",
+        //     onUpdate: function () { console.log('start the anim'); this.target.draw(); },
+        //     onComplete: function () {
+        //         console.log('complete');
+        //      }
+        // }
+        // );
+        // RotatingRect.draw();
+        // tl.play();
+
+        
+        
+
+ 
 
 
-    var speechbubles = [];
-    var verticalPos = 100;
+        var speechbubles = [];
+        var verticalPos = 100;
 
-    for (var i = 0; i < bubbles.length -1; i++) {
 
-        speechbubles[i] = new SpeechBuble({
-            y: verticalPos,
-            dialog: bubbles[i].split("#").join(",")
-        });
+        for (var i = 0; i < bubbles.length - 1; i++) {
+            let dialogText = bubbles[i].split("#").join(",");
+            let isMultiLine = false;
+            if (bubbles[i].length > limitCharacters) {
+                isMultiLine = true;
+            }
 
-        verticalPos += 90;
+            speechbubles[i] = new SpeechBuble({
+                y: verticalPos,
+                dialog: dialogText,
+                multiLine: isMultiLine
+            });
+
+            if (isMultiLine) {
+                verticalPos += 30;
+            }
+
+            verticalPos += 80;
+        }
+
+        for (var i = 0; i < speechbubles.length; ++i) {
+            speechbubles[i].draw();
+        }
+
+        that.finalSpeech();
+
+        console.log(encoder.finish(), 'encoder finish');
+
+        //encoder.download("download.gif");
+        document.getElementById('image').src = 'data:image/gif;base64,' + encode64(encoder.stream().getData())
+
     }
 
     function SpeechBuble(params) {
-        this.x = params.x || 300;
+        this.x = params.x || 100;
         this.y = params.y || 0;
-        this.width = params.width || 400;
+        this.width = params.width || 280;
         this.height = params.height || 50;
         this.fillStyle = params.fillStyle || "#FFFFFF";
         this.strokeStyle = params.strokeStyle || "#000000";
         this.lineWidth = params.lineWidth || 0;
         this.dialog = params.dialog || '';
+        this.multiLine = params.multiLine || false;
     }
 
+    function breakString(text) {
+        let indexToBreak = text.indexOf(' ', 29);
+        return [text.slice(0, indexToBreak), '\n', text.slice(indexToBreak)].join('');
+
+    }
 
     SpeechBuble.prototype.draw = function () {
         if (this.fillStyle) {
+            if (this.multiLine) {
+                this.height += 30;
+                this.dialog = breakString(this.dialog);
+            }
+
             context.fillStyle = this.fillStyle;
-            roundRect(context, this.x, this.y, this.width, this.height, 25,true,false);
+            roundRect(context, this.x, this.y, this.width, this.height, 25, true, false);
             context.fillStyle = '#fff';
-            drawArrowhead(context, {x:this.x+200, y:this.y}, {x:this.x+200, y:this.y+54}, 10);
-           // console.log(encoder.addFrame(context));
+            drawArrowhead(context, { x: this.x + 138, y: this.y }, { x: this.x + 138, y: (this.multiLine == true) ? this.y + 84 : this.y + 54 }, 10);
             context.fillStyle = "#000";
             context.font = "18px Arial";
-            context.fillText(this.dialog, this.x + 20, this.y + 30);
-           // console.log(encoder.addFrame(context));
+            if (this.multiLine) {
+                var lines = this.dialog.split('\n');
+                for (let i = 0; i < lines.length; i++) {
+                    if (i == 0) { this.y += 30; }
+                    context.fillText(lines[i], this.x + 20, this.y + (i * lineheight));
+                }
+            } else {
+                context.fillText(this.dialog, this.x + 20, this.y + 32);
+            }
+
+            console.log(encoder.addFrame(context));
         }
 
         if (this.strokeStyle && this.lineWidth) {
@@ -105,38 +176,84 @@
     }
 
     function finalSpeech() {
-        let x = 275;
-        let y = 600;
-        let height = 100;
-        let width= 450;
-        let dialog = bubbles[5]; // cta
-        context.fillStyle = '#FDD99F';
+        let x = 100;
+        y = 650;
+        height = 150;
+        width = 280;
+        dialog = bubbles[5]; // cta
+        multiLine = false;
 
-        roundRect(context, x, y, width, height, 25, true);
-        // console.log(encoder.addFrame(context));
-        context.fillStyle = "#00AF50";
-        context.fillText(dialog, x + 80, y + 50);
+
+        context.fillStyle = '#fff';
+        context.shadowColor = 'rgba(0,0,0,0.25)';
+        context.shadowOffsetY = 10;
+        roundRect(context, x, y, width, height, 25, true, false);
+
+        context.shadowOffsetY = 0;
+
+        that.context.drawImage(tuLogo, x + 92, y - 48, 96, 96);
+
+
+        context.fillStyle = "#FDD99F";
+        roundRect(context, x, y + 75, width, 75, { tl: 0, tr: 0, bl: 25, br: 25 }, true, false);
+
+        context.fillStyle = "#000";
+        if (dialog.length > limitCharacters) {
+            multiLine = true;
+            dialog = this.breakString(dialog);
+        }
+
+        let posTextY = y + 105;
+        posTextX = x + 20;
+
+        if (multiLine) {
+            dialog = dialog.split('\n');
+
+            for (let i = 0; i < dialog.length; i++) {
+                if (i == 1) posTextX += (limitCharacters - dialog.length) * 3; //center the last segment of text
+                context.fillText(dialog[i], posTextX, posTextY + (i * lineheight));
+            }
+        } else {
+            context.fillText(dialog, posTextX, posTextY);
+        }
     }
 
-    // var tuLogo = new Image();
-    // tuLogo.src = "assets/logo.png";
 
-    // tuLogo.onload = function () {
-    //     this.context.drawImage(tuLogo, 425, 600, 130, 130);
-    //     console.log(this.encoder.addFrame(this.context));
-    // }
+    var cw = canvas.width;
+    var ch = canvas.height;
+
+    context.fillStyle = 'skyblue';
+    context.strokeStyle = 'lightgray';
+    context.lineWidth = 3;
 
 
-    for (var i = 0; i < speechbubles.length; ++i) {
-        speechbubles[i].draw();
+    var PI = Math.PI;
+    var PI2 = PI * 2;
+
+
+    var RotatingRect = {
+        cx: canvas.width / 2,
+        cy: canvas.height / 2,
+        w: 50,
+        h: 35,
+        ww: -50 / 2,
+        hh: -35 / 2,
+        rangle: 0,
+        draw: function () {
+            context.clearRect(0, 0, cw, ch);
+            context.translate(this.cx, this.cy);
+            context.rotate(this.rangle);
+            context.beginPath();
+            context.rect(this.ww, this.hh, this.w, this.h);
+            context.closePath();
+            context.fill();
+            context.stroke();
+            context.rotate(-this.rangle);
+            context.translate(-this.cx, -this.cy);
+            context.setTransform(1, 0, 0, 1, 0, 0);
+        },
     }
 
-   this.finalSpeech();
 
-
-   // console.log(encoder.finish(), 'encoder finish');
-
-
-    document.getElementById('image').src = 'data:image/gif;base64,' + encode64(encoder.stream().getData())
 
 </script>

@@ -1,0 +1,30 @@
+{
+  "name": "tuwjsgif",
+  "version": "1.0.0",
+  "description": "Service for sending personalised invitations",
+  "main": "tuw/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tummyro/jsgif.git"
+  },
+  "keywords": [
+    "tuw",
+    "experience",
+    "nodejs",
+    "email",
+    "service"
+  ],
+  "author": "Elias DEBS",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tummyro/jsgif/issues"
+  },
+  "homepage": "https://github.com/tummyro/jsgif#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "request": "^2.88.0"
+  }
+}
