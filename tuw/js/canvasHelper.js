@@ -1,4 +1,5 @@
-
+var lineheight = 30,
+limitCharacters = 35;
 
 function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
     if (typeof stroke == 'undefined') {

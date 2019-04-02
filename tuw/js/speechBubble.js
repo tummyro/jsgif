@@ -1,9 +1,6 @@
 const fs = require('fs');
 eval(fs.readFileSync('./tuw/js/canvasHelper.js') + '');
 
-const lineheight = 30,
-    limitCharacters = 35;
-
 class SpeechBuble {
     constructor(params, ctx, encoder) {
         if (!ctx || encoder) {
@@ -21,8 +18,6 @@ class SpeechBuble {
         this.context = ctx;
         this.encoder = encoder
     }
-       
-
 
     draw() {
         if (this.fillStyle) {

@@ -17,10 +17,6 @@ eval(fs.readFileSync('./LZWEncoder.js') + '');
 eval(fs.readFileSync('./Demos/b64.js') + '');
 eval(fs.readFileSync('./tuw/js/canvasHelper.js') + '');
 
-const lineheight = 30,
-    limitCharacters = 35;
-
-
 app.get('/invitationTemplate', (req, res) => {
     const canvas = createCanvas(600, 820)
     const ctx = canvas.getContext('2d')
