@@ -24,7 +24,10 @@
   },
   "homepage": "https://github.com/tummyro/jsgif#readme",
   "dependencies": {
+    "atob": "^2.1.2",
+    "canvas": "^2.4.1",
     "express": "^4.16.4",
+    "jsdom": "^14.0.0",
     "request": "^2.88.0"
   }
 }

@@ -66,7 +66,7 @@
         encoder.start();
         console.log(encoder.addFrame(that.context));
 
-        // // Use Greensock to animate from RotatingRect's current angle
+        // Use Greensock to animate from RotatingRect's current angle
         // var tl = TweenLite.to(RotatingRect, 5, {
         //     paused: true,
         //     rangle: PI2 * 2,
@@ -79,12 +79,6 @@
         // );
         // RotatingRect.draw();
         // tl.play();
-
-        
-        
-
- 
-
 
         var speechbubles = [];
         var verticalPos = 100;
@@ -123,58 +117,6 @@
 
     }
 
-    function SpeechBuble(params) {
-        this.x = params.x || 100;
-        this.y = params.y || 0;
-        this.width = params.width || 280;
-        this.height = params.height || 50;
-        this.fillStyle = params.fillStyle || "#FFFFFF";
-        this.strokeStyle = params.strokeStyle || "#000000";
-        this.lineWidth = params.lineWidth || 0;
-        this.dialog = params.dialog || '';
-        this.multiLine = params.multiLine || false;
-    }
-
-    function breakString(text) {
-        let indexToBreak = text.indexOf(' ', 29);
-        return [text.slice(0, indexToBreak), '\n', text.slice(indexToBreak)].join('');
-
-    }
-
-    SpeechBuble.prototype.draw = function () {
-        if (this.fillStyle) {
-            if (this.multiLine) {
-                this.height += 30;
-                this.dialog = breakString(this.dialog);
-            }
-
-            context.fillStyle = this.fillStyle;
-            roundRect(context, this.x, this.y, this.width, this.height, 25, true, false);
-            context.fillStyle = '#fff';
-            drawArrowhead(context, { x: this.x + 138, y: this.y }, { x: this.x + 138, y: (this.multiLine == true) ? this.y + 84 : this.y + 54 }, 10);
-            context.fillStyle = "#000";
-            context.font = "18px Arial";
-            if (this.multiLine) {
-                var lines = this.dialog.split('\n');
-                for (let i = 0; i < lines.length; i++) {
-                    if (i == 0) { this.y += 30; }
-                    context.fillText(lines[i], this.x + 20, this.y + (i * lineheight));
-                }
-            } else {
-                context.fillText(this.dialog, this.x + 20, this.y + 32);
-            }
-
-            console.log(encoder.addFrame(context));
-        }
-
-        if (this.strokeStyle && this.lineWidth) {
-            context.strokeStyle = this.strokeStyle;
-            context.lineWidth = this.lineWidth;
-            context.strokeRect(this.x, this.y, this.width, this.height);
-        }
-
-    }
-
     function finalSpeech() {
         let x = 100;
         y = 650;
@@ -192,7 +134,6 @@
         context.shadowOffsetY = 0;
 
         that.context.drawImage(tuLogo, x + 92, y - 48, 96, 96);
-
 
         context.fillStyle = "#FDD99F";
         roundRect(context, x, y + 75, width, 75, { tl: 0, tr: 0, bl: 25, br: 25 }, true, false);
@@ -218,42 +159,37 @@
         }
     }
 
+//wip
+    // var cw = canvas.width;
+    // var ch = canvas.height;
 
-    var cw = canvas.width;
-    var ch = canvas.height;
-
-    context.fillStyle = 'skyblue';
-    context.strokeStyle = 'lightgray';
-    context.lineWidth = 3;
-
-
-    var PI = Math.PI;
-    var PI2 = PI * 2;
-
-
-    var RotatingRect = {
-        cx: canvas.width / 2,
-        cy: canvas.height / 2,
-        w: 50,
-        h: 35,
-        ww: -50 / 2,
-        hh: -35 / 2,
-        rangle: 0,
-        draw: function () {
-            context.clearRect(0, 0, cw, ch);
-            context.translate(this.cx, this.cy);
-            context.rotate(this.rangle);
-            context.beginPath();
-            context.rect(this.ww, this.hh, this.w, this.h);
-            context.closePath();
-            context.fill();
-            context.stroke();
-            context.rotate(-this.rangle);
-            context.translate(-this.cx, -this.cy);
-            context.setTransform(1, 0, 0, 1, 0, 0);
-        },
-    }
-
-
+    // context.fillStyle = 'skyblue';
+    // context.strokeStyle = 'lightgray';
+    // context.lineWidth = 3;
+    // var PI = Math.PI;
+    // var PI2 = PI * 2;
+    // var RotatingRect = {
+    //     cx: canvas.width / 2,
+    //     cy: canvas.height / 2,
+    //     w: 50,
+    //     h: 35,
+    //     ww: -50 / 2,
+    //     hh: -35 / 2,
+    //     rangle: 0,
+    //     draw: function () {
+    //         context.clearRect(0, 0, cw, ch);
+    //         context.translate(this.cx, this.cy);
+    //         context.rotate(this.rangle);
+    //         //console.log(encoder.addFrame(context));
+    //         context.beginPath();
+    //         context.rect(this.ww, this.hh, this.w, this.h);
+    //         context.closePath();
+    //         context.fill();
+    //         context.stroke();
+    //         context.rotate(-this.rangle);
+    //         context.translate(-this.cx, -this.cy);
+    //         context.setTransform(1, 0, 0, 1, 0, 0);
+    //     },
+    // }
 
 </script>

@@ -1,3 +1,5 @@
+
+
 function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
     if (typeof stroke == 'undefined') {
         stroke = true;
@@ -78,4 +80,12 @@ function drawArrowhead(context, from, to, radius) {
 	context.closePath();
 
 	context.fill();
+}
+
+// multiline is not supported in <canvas>, 
+//so we have to break the text for proper alignment
+function breakString(text) {
+    let indexToBreak = text.indexOf(' ', 29);
+    return [text.slice(0, indexToBreak), '\n', text.slice(indexToBreak)].join('');
+
 }
