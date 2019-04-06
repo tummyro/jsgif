@@ -31,6 +31,7 @@ app.get('/invitationTemplate', (req, res) => {
     encoder.setRepeat(1);
     encoder.setDelay(2000);
     var tuLogo = './tuw/assets/tu96.png';
+
     loadImage(tuLogo).then((image) => {
         console.log('asset loaded');
         encoder.start();
@@ -100,16 +101,16 @@ app.get('/invitationTemplate', (req, res) => {
         }
 
 
-        for (var i = 0; i < speechbubles.length; ++i) {
-            speechbubles[i].draw();
-        }
+//        for (var i = 0; i < speechbubles.length; ++i) {
+            speechbubles[1].draw();
+  //      }
 
         finalSpeech();
         console.log(encoder.addFrame(ctx));
         encoder.finish();
 
         fs.appendFileSync('./tuw/invitations/inv.gif', new Buffer.from(encoder.download("download.gif")));
-        res.send('Sucessfully downloaded');
+        res.send('Invitation sucessfuly created !');
     });
 });
 

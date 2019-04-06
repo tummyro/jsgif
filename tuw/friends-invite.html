@@ -3,6 +3,7 @@
 <script src="../NeuQuant.js"></script>
 <script src="../GIFEncoder.js"></script>
 <script src="./js/canvasHelper.js"></script>
+<script src="./js/speechBubble.js"></script>
 <style>
     body {
         background-color: ivory;
@@ -12,8 +13,6 @@
         border: 1px solid red;
     }
 </style>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenLite.min.js"></script>
 
 <body>
     <h1>Building the .gif</h1>
@@ -66,19 +65,19 @@
         encoder.start();
         console.log(encoder.addFrame(that.context));
 
-        // Use Greensock to animate from RotatingRect's current angle
-        // var tl = TweenLite.to(RotatingRect, 5, {
-        //     paused: true,
-        //     rangle: PI2 * 2,
-        //     ease: "Quart.easeOut",
-        //     onUpdate: function () { console.log('start the anim'); this.target.draw(); },
-        //     onComplete: function () {
-        //         console.log('complete');
-        //      }
-        // }
-        // );
-        // RotatingRect.draw();
-        // tl.play();
+       // Use Greensock to animate from RotatingRect's current angle
+        var tl = TweenLite.to(RotatingRect, 5, {
+            paused: true,
+            rangle: PI2 * 2,
+            ease: "Quart.easeOut",
+            onUpdate: function () { console.log('start the anim'); this.target.draw(); },
+            onComplete: function () {
+                console.log('complete');
+             }
+        }
+        );
+        RotatingRect.draw();
+        tl.play();
 
         var speechbubles = [];
         var verticalPos = 100;
@@ -160,36 +159,36 @@
     }
 
 //wip
-    // var cw = canvas.width;
-    // var ch = canvas.height;
+    var cw = canvas.width;
+    var ch = canvas.height;
 
-    // context.fillStyle = 'skyblue';
-    // context.strokeStyle = 'lightgray';
-    // context.lineWidth = 3;
-    // var PI = Math.PI;
-    // var PI2 = PI * 2;
-    // var RotatingRect = {
-    //     cx: canvas.width / 2,
-    //     cy: canvas.height / 2,
-    //     w: 50,
-    //     h: 35,
-    //     ww: -50 / 2,
-    //     hh: -35 / 2,
-    //     rangle: 0,
-    //     draw: function () {
-    //         context.clearRect(0, 0, cw, ch);
-    //         context.translate(this.cx, this.cy);
-    //         context.rotate(this.rangle);
-    //         //console.log(encoder.addFrame(context));
-    //         context.beginPath();
-    //         context.rect(this.ww, this.hh, this.w, this.h);
-    //         context.closePath();
-    //         context.fill();
-    //         context.stroke();
-    //         context.rotate(-this.rangle);
-    //         context.translate(-this.cx, -this.cy);
-    //         context.setTransform(1, 0, 0, 1, 0, 0);
-    //     },
-    // }
+    context.fillStyle = 'skyblue';
+    context.strokeStyle = 'lightgray';
+    context.lineWidth = 3;
+    var PI = Math.PI;
+    var PI2 = PI * 2;
+    var RotatingRect = {
+        cx: canvas.width / 2,
+        cy: canvas.height / 2,
+        w: 50,
+        h: 35,
+        ww: -50 / 2,
+        hh: -35 / 2,
+        rangle: 0,
+        draw: function () {
+            context.clearRect(0, 0, cw, ch);
+            context.translate(this.cx, this.cy);
+            context.rotate(this.rangle);
+            //console.log(encoder.addFrame(context));
+            context.beginPath();
+            context.rect(this.ww, this.hh, this.w, this.h);
+            context.closePath();
+            context.fill();
+            context.stroke();
+            context.rotate(-this.rangle);
+            context.translate(-this.cx, -this.cy);
+            context.setTransform(1, 0, 0, 1, 0, 0);
+        },
+    }
 
 </script>

@@ -157,7 +157,7 @@ LZWEncoder = function() {
 		outer_loop: while ((c = nextPixel()) != EOF) {
 			fcode = (c << maxbits) + ent;
 			i = (c << hshift) ^ ent; // xor hashing
-
+			
 			if (htab[i] == fcode) {
 				ent = codetab[i];
 				continue;

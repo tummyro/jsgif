@@ -27,19 +27,20 @@
  * @version 0.1 AS3 implementation
  */
 
-NeuQuant = function() {
-
-	var exports = {};
-	var netsize = 256; /* number of colours used */
+class NeuQuant {
+	constructor() {
+	
+	this.exports = {};
+	this.netsize = 256; /* number of colours used */
 
 	/* four primes near 500 - assume no image has a length so large */
 	/* that it is divisible by all four primes */
 
-	var prime1 = 499;
-	var prime2 = 491;
-	var prime3 = 487;
-	var prime4 = 503;
-	var minpicturebytes = (3 * prime4); /* minimum size for input image */
+	this.prime1 = 499;
+	this.prime2 = 491;
+	this.prime3 = 487;
+	this.prime4 = 503;
+	this.minpicturebytes = (3 * this.prime4); /* minimum size for input image */
 
 	/*
 	 * Program Skeleton ---------------- [select samplefac in range 1..30] [read
@@ -53,91 +54,93 @@ NeuQuant = function() {
 	 * Network Definitions -------------------
 	 */
 
-	var maxnetpos = (netsize - 1);
-	var netbiasshift = 4; /* bias for colour values */
-	var ncycles = 100; /* no. of learning cycles */
+	this.maxnetpos = (this.netsize - 1);
+	this.netbiasshift = 4; /* bias for colour values */
+	this.ncycles = 100; /* no. of learning cycles */
 
 	/* defs for freq and bias */
-	var intbiasshift = 16; /* bias for fractions */
-	var intbias = (1 << intbiasshift);
-	var gammashift = 10; /* gamma = 1024 */
-	var gamma = (1 << gammashift);
-	var betashift = 10;
-	var beta = (intbias >> betashift); /* beta = 1/1024 */
-	var betagamma = (intbias << (gammashift - betashift));
+	this.intbiasshift = 16; /* bias for fractions */
+	this.intbias = (1 << this.intbiasshift);
+	this.gammashift = 10; /* gamma = 1024 */
+	this.gamma = (1 << this.gammashift);
+	this.betashift = 10;
+	this.beta = (this.intbias >> this.betashift); /* beta = 1/1024 */
+	this.betagamma = (this.intbias << (this.gammashift - this.betashift));
 
 	/* defs for decreasing radius factor */
-	var initrad = (netsize >> 3); /* for 256 cols, radius starts */
-	var radiusbiasshift = 6; /* at 32.0 biased by 6 bits */
-	var radiusbias = (1 << radiusbiasshift);
-	var initradius = (initrad * radiusbias); /* and decreases by a */
-	var radiusdec = 30; /* factor of 1/30 each cycle */
+	this.initrad = (this.netsize >> 3); /* for 256 cols, radius starts */
+	this.radiusbiasshift = 6; /* at 32.0 biased by 6 bits */
+	this.radiusbias = (1 << this.radiusbiasshift);
+	this.initradius = (this.initrad * this.radiusbias); /* and decreases by a */
+	this.radiusdec = 30; /* factor of 1/30 each cycle */
 
 	/* defs for decreasing alpha factor */
-	var alphabiasshift = 10; /* alpha starts at 1.0 */
-	var initalpha = (1 << alphabiasshift);
-	var alphadec; /* biased by 10 bits */
+	this.alphabiasshift = 10; /* alpha starts at 1.0 */
+	this.initalpha = (1 << this.alphabiasshift);
+	this.alphadec; /* biased by 10 bits */
 
 	/* radbias and alpharadbias used for radpower calculation */
-	var radbiasshift = 8;
-	var radbias = (1 << radbiasshift);
-	var alpharadbshift = (alphabiasshift + radbiasshift);
-	var alpharadbias = (1 << alpharadbshift);
+	this.radbiasshift = 8;
+	this.radbias = (1 << this.radbiasshift);
+	this.alpharadbshift = (this.alphabiasshift + this.radbiasshift);
+	this.alpharadbias = (1 << this.alpharadbshift);
 
 	/*
 	 * Types and Global Variables --------------------------
 	 */
 
-	var thepicture; /* the input image itself */
-	var lengthcount; /* lengthcount = H*W*3 */
-	var samplefac; /* sampling factor 1..30 */
+	this.thepicture; /* the input image itself */
+	this.lengthcount; /* lengthcount = H*W*3 */
+	this.samplefac; /* sampling factor 1..30 */
 
 	// typedef int pixel[4]; /* BGRc */
-	var network; /* the network itself - [netsize][4] */
-	var netindex = [];
+	this.network; /* the network itself - [netsize][4] */
+	this.netindex = [];
 
 	/* for network lookup - really 256 */
-	var bias = [];
+	this.bias = [];
 
 	/* bias and freq arrays for learning */
-	var freq = [];
-	var radpower = [];
+	this.freq = [];
+	this.radpower = [];
 
-	var NeuQuant = exports.NeuQuant = function NeuQuant(thepic, len, sample) {
+	}
+
+	NeuQuantinit (thepic, len, sample) {
 
 		var i;
 		var p;
 
-		thepicture = thepic;
-		lengthcount = len;
-		samplefac = sample;
+		this.thepicture = thepic;
+		this.lengthcount = len;
+		this.samplefac = sample;
 
-		network = new Array(netsize);
+		this.network = new Array(this.netsize);
 
-		for (i = 0; i < netsize; i++) {
+		for (i = 0; i < this.netsize; i++) {
 
-			network[i] = new Array(4);
-			p = network[i];
-			p[0] = p[1] = p[2] = (i << (netbiasshift + 8)) / netsize;
-			freq[i] = intbias / netsize; /* 1/netsize */
-			bias[i] = 0;
+			this.network[i] = new Array(4);
+			p = this.network[i];
+			p[0] = p[1] = p[2] = (i << (this.netbiasshift + 8)) / this.netsize;
+			this.freq[i] = this.intbias / this.netsize; /* 1/netsize */
+			this.bias[i] = 0;
 		}
 	};
 
-	var colorMap = function colorMap() {
+	colorMap() {
 
 		var map = [];
-		var index = new Array(netsize);
+		var index = new Array(this.netsize);
 
-		for (var i = 0; i < netsize; i++)
-			index[network[i][3]] = i;
+		for (var i = 0; i < this.netsize; i++)
+			index[this.network[i][3]] = i;
 
 		var k = 0;
-		for (var l = 0; l < netsize; l++) {
+		for (var l = 0; l < this.netsize; l++) {
 			var j = index[l];
-			map[k++] = (network[j][0]);
-			map[k++] = (network[j][1]);
-			map[k++] = (network[j][2]);
+			map[k++] = (this.network[j][0]);
+			map[k++] = (this.network[j][1]);
+			map[k++] = (this.network[j][2]);
 		}
 
 		return map;
@@ -149,7 +152,7 @@ NeuQuant = function() {
 	 * -------------------------------------------------------------------------------
 	 */
 
-	var inxbuild = function inxbuild() {
+	inxbuild() {
 
 		var i;
 		var j;
@@ -162,22 +165,22 @@ NeuQuant = function() {
 
 		previouscol = 0;
 		startpos = 0;
-		for (i = 0; i < netsize; i++) {
+		for (i = 0; i < this.netsize; i++) {
 
-			p = network[i];
+			p = this.network[i];
 			smallpos = i;
 			smallval = p[1]; /* index on g */
 
-			/* find smallest in i..netsize-1 */
-			for (j = i + 1; j < netsize; j++) {
+			/* find smallest in i..this.netsize-1 */
+			for (j = i + 1; j < this.netsize; j++) {
 
-				q = network[j];
+				q = this.network[j];
 				if (q[1] < smallval) { /* index on g */
 					smallpos = j;
 					smallval = q[1]; /* index on g */
 				}
 			}
-			q = network[smallpos];
+			q = this.network[smallpos];
 
 			/* swap p (i) and q (smallpos) entries */
 			if (i != smallpos) {
@@ -199,24 +202,24 @@ NeuQuant = function() {
 
 			if (smallval != previouscol) {
 
-				netindex[previouscol] = (startpos + i) >> 1;
+				this.netindex[previouscol] = (startpos + i) >> 1;
 
-				for (j = previouscol + 1; j < smallval; j++) netindex[j] = i;
+				for (j = previouscol + 1; j < smallval; j++) this.netindex[j] = i;
 
 				previouscol = smallval;
 				startpos = i;
 			}
 		}
 
-		netindex[previouscol] = (startpos + maxnetpos) >> 1;
-		for (j = previouscol + 1; j < 256; j++) netindex[j] = maxnetpos; /* really 256 */
+		this.netindex[previouscol] = (startpos + this.maxnetpos) >> 1;
+		for (j = previouscol + 1; j < 256; j++) this.netindex[j] = this.maxnetpos; /* really 256 */
 	};
 
 	/*
 	 * Main Learning Loop ------------------
 	 */
 
-	var learn = function learn() {
+	learn() {
 
 		var i;
 		var j;
@@ -233,61 +236,61 @@ NeuQuant = function() {
 		var pix;
 		var lim;
 
-		if (lengthcount < minpicturebytes) samplefac = 1;
+		if (this.lengthcount < this.minpicturebytes) this.samplefac = 1;
 
-		alphadec = 30 + ((samplefac - 1) / 3);
-		p = thepicture;
+		this.alphadec = 30 + ((this.samplefac - 1) / 3);
+		p = this.thepicture;
 		pix = 0;
-		lim = lengthcount;
-		samplepixels = lengthcount / (3 * samplefac);
-		delta = (samplepixels / ncycles) | 0;
-		alpha = initalpha;
-		radius = initradius;
+		lim = this.lengthcount;
+		samplepixels = this.lengthcount / (3 * this.samplefac);
+		delta = (samplepixels / this.ncycles) | 0;
+		alpha = this.initalpha;
+		radius = this.initradius;
 
-		rad = radius >> radiusbiasshift;
+		rad = radius >> this.radiusbiasshift;
 		if (rad <= 1) rad = 0;
 
-		for (i = 0; i < rad; i++) radpower[i] = alpha * (((rad * rad - i * i) * radbias) / (rad * rad));
+		for (i = 0; i < rad; i++) this.radpower[i] = alpha * (((rad * rad - i * i) * this.radbias) / (rad * rad));
 
-		if (lengthcount < minpicturebytes) step = 3;
+		if (this.lengthcount < this.minpicturebytes) step = 3;
 
-		else if ((lengthcount % prime1) !== 0) step = 3 * prime1;
+		else if ((this.lengthcount % this.prime1) !== 0) step = 3 * this.prime1;
 
 		else {
 
-			if ((lengthcount % prime2) !== 0) step = 3 * prime2;
+			if ((this.lengthcount % this.prime2) !== 0) step = 3 * this.prime2;
 			else {
-				if ((lengthcount % prime3) !== 0) step = 3 * prime3;
-				else step = 3 * prime4;
+				if ((this.lengthcount % this.prime3) !== 0) step = 3 * this.prime3;
+				else step = 3 * this.prime4;
 			}
 		}
 
 		i = 0;
 		while (i < samplepixels) {
 
-			b = (p[pix + 0] & 0xff) << netbiasshift;
-			g = (p[pix + 1] & 0xff) << netbiasshift;
-			r = (p[pix + 2] & 0xff) << netbiasshift;
-			j = contest(b, g, r);
+			b = (p[pix + 0] & 0xff) << this.netbiasshift;
+			g = (p[pix + 1] & 0xff) << this.netbiasshift;
+			r = (p[pix + 2] & 0xff) << this.netbiasshift;
+			j = this.contest(b, g, r);
 
-			altersingle(alpha, j, b, g, r);
-			if (rad !== 0) alterneigh(rad, j, b, g, r); /* alter neighbours */
+			this.altersingle(alpha, j, b, g, r);
+			if (rad !== 0) this.alterneigh(rad, j, b, g, r); /* alter neighbours */
 
 			pix += step;
-			if (pix >= lim) pix -= lengthcount;
+			if (pix >= lim) pix -= this.lengthcount;
 
 			i++;
 
 			if (delta === 0) delta = 1;
 
 			if (i % delta === 0) {
-				alpha -= alpha / alphadec;
-				radius -= radius / radiusdec;
-				rad = radius >> radiusbiasshift;
+				alpha -= alpha / this.alphadec;
+				radius -= radius / this.radiusdec;
+				rad = radius >> this.radiusbiasshift;
 
 				if (rad <= 1) rad = 0;
 
-				for (j = 0; j < rad; j++) radpower[j] = alpha * (((rad * rad - j * j) * radbias) / (rad * rad));
+				for (j = 0; j < rad; j++) this.radpower[j] = alpha * (((rad * rad - j * j) * this.radbias) / (rad * rad));
 			}
 		}
 	};
@@ -298,7 +301,7 @@ NeuQuant = function() {
 	 * ----------------------------------------------------------------------------
 	 */
 
-	var map = exports.map = function map(b, g, r) {
+	map(b, g, r) {
 
 		var i;
 		var j;
@@ -310,16 +313,16 @@ NeuQuant = function() {
 
 		bestd = 1000; /* biggest possible dist is 256*3 */
 		best = -1;
-		i = netindex[g]; /* index on g */
+		i = this.netindex[g]; /* index on g */
 		j = i - 1; /* start at netindex[g] and work outwards */
 
-		while ((i < netsize) || (j >= 0)) {
+		while ((i < this.netsize) || (j >= 0)) {
 
-			if (i < netsize) {
-				p = network[i];
+			if (i < this.netsize) {
+				p = this.network[i];
 				dist = p[1] - g; /* inx key */
 
-				if (dist >= bestd) i = netsize; /* stop iter */
+				if (dist >= bestd) i = this.netsize; /* stop iter */
 
 				else {
 
@@ -344,7 +347,7 @@ NeuQuant = function() {
 
 			if (j >= 0) {
 
-				p = network[j];
+				p = this.network[j];
 				dist = g - p[1]; /* inx key - reverse dif */
 
 				if (dist >= bestd) j = -1; /* stop iter */
@@ -373,11 +376,11 @@ NeuQuant = function() {
 		return (best);
 	};
 
-	var process = exports.process = function process() {
-		learn();
-		unbiasnet();
-		inxbuild();
-		return colorMap();
+	process() {
+		this.learn();
+		this.unbiasnet();
+		this.inxbuild();
+		return this.colorMap();
 	};
 
 	/*
@@ -386,16 +389,16 @@ NeuQuant = function() {
 	 * -----------------------------------------------------------------------------------
 	 */
 
-	var unbiasnet = function unbiasnet() {
+	unbiasnet() {
 
 		var i;
 		var j;
 
-		for (i = 0; i < netsize; i++) {
-			network[i][0] >>= netbiasshift;
-			network[i][1] >>= netbiasshift;
-			network[i][2] >>= netbiasshift;
-			network[i][3] = i; /* record colour no */
+		for (i = 0; i < this.netsize; i++) {
+			this.network[i][0] >>= this.netbiasshift;
+			this.network[i][1] >>= this.netbiasshift;
+			this.network[i][2] >>= this.netbiasshift;
+			this.network[i][3] = i; /* record colour no */
 		}
 	};
 
@@ -405,7 +408,7 @@ NeuQuant = function() {
 	 * ---------------------------------------------------------------------------------
 	 */
 
-	var alterneigh = function alterneigh(rad, i, b, g, r) {
+	alterneigh(rad, i, b, g, r) {
 
 		var j;
 		var k;
@@ -419,32 +422,32 @@ NeuQuant = function() {
 		if (lo < -1) lo = -1;
 
 		hi = i + rad;
-		if (hi > netsize) hi = netsize;
+		if (hi > this.netsize) hi = this.netsize;
 
 		j = i + 1;
 		k = i - 1;
 		m = 1;
 
 		while ((j < hi) || (k > lo)) {
-			a = radpower[m++];
+			a = this.radpower[m++];
 
 			if (j < hi) {
-				p = network[j++];
+				p = this.network[j++];
 
 				try {
-					p[0] -= (a * (p[0] - b)) / alpharadbias;
-					p[1] -= (a * (p[1] - g)) / alpharadbias;
-					p[2] -= (a * (p[2] - r)) / alpharadbias;
+					p[0] -= (a * (p[0] - b)) / this.alpharadbias;
+					p[1] -= (a * (p[1] - g)) / this.alpharadbias;
+					p[2] -= (a * (p[2] - r)) / this.alpharadbias;
 				} catch (e) {} // prevents 1.3 miscompilation
 			}
 
 			if (k > lo) {
-				p = network[k--];
+				p = this.network[k--];
 
 				try {
-					p[0] -= (a * (p[0] - b)) / alpharadbias;
-					p[1] -= (a * (p[1] - g)) / alpharadbias;
-					p[2] -= (a * (p[2] - r)) / alpharadbias;
+					p[0] -= (a * (p[0] - b)) / this.alpharadbias;
+					p[1] -= (a * (p[1] - g)) / this.alpharadbias;
+					p[2] -= (a * (p[2] - r)) / this.alpharadbias;
 				} catch (e) {}
 			}
 		}
@@ -455,20 +458,20 @@ NeuQuant = function() {
 	 * ----------------------------------------------------
 	 */
 
-	var altersingle = function altersingle(alpha, i, b, g, r) {
+	altersingle(alpha, i, b, g, r) {
 
 		/* alter hit neuron */
-		var n = network[i];
-		n[0] -= (alpha * (n[0] - b)) / initalpha;
-		n[1] -= (alpha * (n[1] - g)) / initalpha;
-		n[2] -= (alpha * (n[2] - r)) / initalpha;
+		var n = this.network[i];
+		n[0] -= (alpha * (n[0] - b)) / this.initalpha;
+		n[1] -= (alpha * (n[1] - g)) / this.initalpha;
+		n[2] -= (alpha * (n[2] - r)) / this.initalpha;
 	};
 
 	/*
 	 * Search for biased BGR values ----------------------------
 	 */
 
-	var contest = function contest(b, g, r) {
+	contest(b, g, r) {
 
 		/* finds closest neuron (min dist) and updates freq */
 		/* finds best neuron (min dist-bias) and returns position */
@@ -491,8 +494,8 @@ NeuQuant = function() {
 		bestpos = -1;
 		bestbiaspos = bestpos;
 
-		for (i = 0; i < netsize; i++) {
-			n = network[i];
+		for (i = 0; i < this.netsize; i++) {
+			n = this.network[i];
 			dist = n[0] - b;
 			if (dist < 0) dist = -dist;
 			a = n[1] - g;
@@ -507,23 +510,22 @@ NeuQuant = function() {
 				bestpos = i;
 			}
 
-			biasdist = dist - ((bias[i]) >> (intbiasshift - netbiasshift));
+			biasdist = dist - ((this.bias[i]) >> (this.intbiasshift - this.netbiasshift));
 
 			if (biasdist < bestbiasd) {
 				bestbiasd = biasdist;
 				bestbiaspos = i;
 			}
 
-			betafreq = (freq[i] >> betashift);
-			freq[i] -= betafreq;
-			bias[i] += (betafreq << gammashift);
+			betafreq = (this.freq[i] >> this.betashift);
+			this.freq[i] -= betafreq;
+			this.bias[i] += (betafreq << this.gammashift);
 		}
 
-		freq[bestpos] += beta;
-		bias[bestpos] -= betagamma;
-		return (bestbiaspos);
+		this.freq[bestpos] += this.beta;
+		this.bias[bestpos] -= this.betagamma;
+		return bestbiaspos;
 	};
-
-	NeuQuant.apply(this, arguments);
-	return exports;
 };
+
+module.exports = NeuQuant;
